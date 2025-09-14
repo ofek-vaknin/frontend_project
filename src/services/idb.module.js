@@ -1,37 +1,50 @@
 // src/services/idb.module.js
-import { fetchRates } from "./exchangeRates";
+import { fetchRates } from "./exchangeRates"
 
-const DB_NAME = "costsdb";
-const STORE_NAME = "costs";
+const DB_NAME = "costsdb"
+const STORE_NAME = "costs"
 
+const listeners = new Set()
+
+export function subscribeToChanges(listener) {
+    listeners.add(listener)
+    return () => {
+        listeners.delete(listener)
+    }
+}
+
+function notifyChange() {
+    listeners.forEach((l) => l())
+}
+// -------------------
 
 export function openCostsDB(databaseName = DB_NAME, databaseVersion = 1) {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(databaseName, databaseVersion);
+        const request = indexedDB.open(databaseName, databaseVersion)
 
         request.onupgradeneeded = (event) => {
-            const db = event.target.result;
+            const db = event.target.result
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 const store = db.createObjectStore(STORE_NAME, {
                     keyPath: "id",
                     autoIncrement: true,
-                });
-                store.createIndex("year", "date.year", { unique: false });
-                store.createIndex("month", "date.month", { unique: false });
+                })
+                store.createIndex("year", "date.year", { unique: false })
+                store.createIndex("month", "date.month", { unique: false })
             }
-        };
+        }
 
-        request.onsuccess = (event) => resolve(event.target.result);
-        request.onerror = (event) => reject(event.target.error);
-    });
+        request.onsuccess = (event) => resolve(event.target.result)
+        request.onerror = (event) => reject(event.target.error)
+    })
 }
 
 export async function addCost(cost) {
-    const db = await openCostsDB();
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
+    const db = await openCostsDB()
+    const tx = db.transaction(STORE_NAME, "readwrite")
+    const store = tx.objectStore(STORE_NAME)
 
-    const now = new Date();
+    const now = new Date()
     const item = {
         sum: cost.sum,
         currency: cost.currency,
@@ -42,13 +55,16 @@ export async function addCost(cost) {
             month: now.getMonth() + 1,
             day: now.getDate(),
         },
-    };
+    }
 
     return new Promise((resolve, reject) => {
-        const req = store.add(item);
-        req.onsuccess = () => resolve(item);
-        req.onerror = (e) => reject(e.target.error);
-    });
+        const req = store.add(item)
+        req.onsuccess = () => {
+            notifyChange()   // 🔹 נעדכן את כל הגרפים
+            resolve(item)
+        }
+        req.onerror = (e) => reject(e.target.error)
+    })
 }
 
 export async function getReport(year, month, currency) {

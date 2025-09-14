@@ -1,20 +1,36 @@
-import React from 'react';
-import { Typography, Paper, Box } from '@mui/material';
-import PieByCategory from './Charts/PieByCategory.jsx';
-import BarByMonth from './Charts/BarByMonth.jsx';
+import React, { useEffect, useState } from 'react'
+import { Typography, Paper, Box } from '@mui/material'
+import PieByCategory from './Charts/PieByCategory.jsx'
+import BarByMonth from './Charts/BarByMonth.jsx'
+import { getReport, subscribeToChanges } from '../services/idb.module.js'
 
-export default function ChartsView({ report }) {
+export default function ChartsView({ year = new Date().getFullYear(), month = new Date().getMonth() + 1, currency = 'USD' }) {
+    const [report, setReport] = useState(null)
+
+    const refresh = async () => {
+        const rep = await getReport(year, month, currency)
+        setReport(rep)
+    }
+
+    useEffect(() => {
+        (async () => {
+            await refresh()
+        })()
+        return subscribeToChanges(refresh)
+    }, [year, month, currency])
+
     if (!report) {
         return (
             <Typography variant="body1" color="text.secondary">
                 No report data available. Please run a report first.
             </Typography>
-        );
+        )
     }
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Typography variant="h5">Charts</Typography>
+
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                 <Paper sx={{ flex: 1, minWidth: 400, p: 2 }}>
                     <Typography variant="subtitle1" gutterBottom>
@@ -22,6 +38,7 @@ export default function ChartsView({ report }) {
                     </Typography>
                     <PieByCategory data={report.costs} currency={report.currency} />
                 </Paper>
+
                 <Paper sx={{ flex: 1, minWidth: 400, p: 2 }}>
                     <Typography variant="subtitle1" gutterBottom>
                         By Month ({report.currency})
@@ -30,5 +47,5 @@ export default function ChartsView({ report }) {
                 </Paper>
             </Box>
         </Box>
-    );
+    )
 }
