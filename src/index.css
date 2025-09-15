@@ -1,3 +1,12 @@
+/* ------------------------------------------------------
+   Global Stylesheet
+   ------------------------------------------------------
+   - Defines default typography, layout, and color scheme
+   - Provides light/dark theme adjustments
+   - Resets basic element styles (body, a, h1, button)
+   - Includes responsive handling via prefers-color-scheme
+------------------------------------------------------ */
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

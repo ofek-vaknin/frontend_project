@@ -1,22 +1,28 @@
-import { createTheme } from '@mui/material/styles'
+// src/theme.js
+import { createTheme } from "@mui/material/styles";
 
+/**
+ * Custom Material-UI theme for the application.
+ * Defines color palette and component overrides.
+ */
 const theme = createTheme({
     palette: {
-        mode: 'light',
-        primary: { main: '#4caf50' },   // ירוק מודרני
-        secondary: { main: '#ff9800' }, // כתום
+        mode: "light", // Light mode theme
+        primary: { main: "#4caf50" }, // Green (modern look)
+        secondary: { main: "#ff9800" }, // Orange
     },
     components: {
         MuiContainer: {
             styleOverrides: {
                 root: {
-                    maxWidth: '100% !important', // הרחבה על כל המסך
-                    paddingLeft: '2rem',
-                    paddingRight: '2rem',
+                    // Extend container to full width
+                    maxWidth: "100% !important",
+                    paddingLeft: "2rem",
+                    paddingRight: "2rem",
                 },
             },
         },
     },
-})
+});
 
-export default theme
+export default theme;

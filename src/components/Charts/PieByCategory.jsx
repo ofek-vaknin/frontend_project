@@ -1,53 +1,76 @@
-import React from 'react'
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+// PieByCategory.jsx
+// ----------------------------
+// Displays a pie chart of total costs grouped by categories
+// for a given month and selected currency.
+// ----------------------------
 
+import React from "react";
+import {
+    PieChart,
+    Pie,
+    Cell,
+    Tooltip,
+    Legend,
+    ResponsiveContainer
+} from "recharts";
+
+// Colors for pie slices (rotating through palette)
 const COLORS = [
-    '#1976d2',
-    '#9c27b0',
-    '#ff9800',
-    '#4caf50',
-    '#f44336',
-    '#009688',
-    '#795548'
-]
+    "#1976d2",
+    "#9c27b0",
+    "#ff9800",
+    "#4caf50",
+    "#f44336",
+    "#009688",
+    "#795548"
+];
 
+/**
+ * PieByCategory Component
+ * ----------------------------
+ * Renders a pie chart of expenses grouped by category.
+ * If no data is provided, a simple message is shown.
+ *
+ * @param {Array} data - Array of category totals [{name, value}]
+ * @param {string} currency - The currency to display in labels and tooltips
+ * @returns {JSX.Element} - Responsive pie chart
+ */
 export default function PieByCategory({ data, currency }) {
+    // If there is no data, show fallback message
     if (!data || data.length === 0) {
-        return <p>No data for pie chart</p>
+        return <p>No data for pie chart</p>;
     }
 
-    // לסכם לפי קטגוריה
-    const aggregated = data.reduce((acc, item) => {
-        acc[item.category] =
-            (acc[item.category] || 0) + (item.converted ?? item.sum)
-        return acc
-    }, {})
-
-    const chartData = Object.entries(aggregated).map(([name, value]) => ({
-        name,
-        value: Number(value)
-    }))
-
     return (
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="120%" height={400}>
             <PieChart>
                 <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={150}
-                    dataKey="value"
+                    data={data}
+                    cx="47%"          // Horizontal center
+                    cy="50%"          // Vertical center
+                    outerRadius={100} // Size of pie
+                    dataKey="value"   // Use "value" field for slices
+                    // Label shows category name + formatted value
                     label={({ name, value }) =>
                         `${name}: ${value.toFixed(2)} ${currency}`
                     }
                 >
-                    {chartData.map((_, i) => (
+                    {/* Apply a unique color to each slice */}
+                    {data.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                 </Pie>
+
+                {/* Tooltip shows formatted value with currency */}
                 <Tooltip formatter={(v) => `${Number(v).toFixed(2)} ${currency}`} />
-                <Legend />
+
+                {/* Legend for categories */}
+                <Legend
+                verticalAlign="bottom"
+                align="left"
+                wrapperStyle={{ marginLeft: 40 }}
+            />
             </PieChart>
         </ResponsiveContainer>
-    )
+    );
 }
